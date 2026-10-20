@@ -13,7 +13,7 @@ svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.4;stroke
 #pw{margin:auto auto 0;flex:none}#cv{display:block;border:3px solid var(--fg);box-shadow:5px 5px 0 var(--fg)}
 #sheet{position:absolute;inset:0;overflow:hidden;isolation:isolate}
 #col{position:absolute;column-fill:auto;column-gap:0}.para{display:block}#ov{position:absolute;inset:0;pointer-events:none;display:none}
-.hl{border-radius:2px}.underlined{ text-decoration-line:underline;text-decoration-thickness:2px;text-decoration-color:var(--ulc,#e6d98a);text-underline-offset:3px } body.underline-mode #col [data-w]{touch-action:none} #dock{gap:3px} #dm{gap:4px} #ulColor{box-shadow:2px 2px 0 var(--fg)}
+.hl{border-radius:2px}.underlined{ text-decoration-line:underline;text-decoration-thickness:2px;text-decoration-color:var(--ulc,#e6d98a);text-underline-offset:3px } body.underline-mode #col{touch-action:none} body.underline-mode #col [data-w]{touch-action:none;cursor:crosshair} #dock{gap:3px} #dm{gap:4px} #ulColor{box-shadow:2px 2px 0 var(--fg)}
 .fold{display:inline-block;vertical-align:baseline;width:fit-content;max-width:42%;height:14px;line-height:14px;margin:0 0 0 5px;padding:0 11px 0 5px;font:9px/14px 'Courier New',monospace;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;break-inside:avoid;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,0 100%);transform:translateY(-1px);pointer-events:auto}
 .fold:after{content:"";position:absolute;right:0;top:0;width:7px;height:7px;background:linear-gradient(225deg,transparent 50%,rgba(0,0,0,.4) 50%)}
 #dock{position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 8px);z-index:6;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
@@ -178,9 +178,24 @@ function addUnderlineRange(a,b){if(!doc||$('#sheet').hidden)return;const lo=Math
 $('#ulToggle').onclick=()=>{S.ulOn=S.ulOn?0:1;save();document.body.classList.toggle('underline-mode',!!S.ulOn);$('#ulToggle').classList.toggle('on',!!S.ulOn);flash(S.ulOn?'UNDERLINE ON':'UNDERLINE OFF')};
 $('#ulColor').value=S.ulc||'#e6d98a';$('#ulColor').oninput=e=>{S.ulc=e.target.value;save();render(1)};
 $('#ulUndo').onclick=()=>{const a=B().ul||[];for(let i=a.length-1;i>=0;i--){if(a[i].p===P){a.splice(i,1);break}}save();render(1)};
-$('#col').addEventListener('pointerdown',e=>{if(!S.ulOn)return;const el=e.target.closest('[data-w]');if(!el)return;e.preventDefault();underlineStart=+el.dataset.w;try{el.setPointerCapture(e.pointerId)}catch(_){}},{passive:false});
-$('#col').addEventListener('pointerup',e=>{if(!S.ulOn||underlineStart===null)return;const el=wordAtPoint(e.clientX,e.clientY);const end=el?+el.dataset.w:underlineStart;addUnderlineRange(underlineStart,end);underlineStart=null;e.preventDefault()},{passive:false});
-$('#col').addEventListener('pointercancel',()=>underlineStart=null);
+const underlineLayer=$('#col');
+underlineLayer.addEventListener('pointerdown',e=>{
+ if(!S.ulOn || !e.isPrimary)return;
+ const el=e.target.closest('[data-w]'); if(!el)return;
+ e.preventDefault(); underlineStart=Number(el.dataset.w);
+ try{underlineLayer.setPointerCapture(e.pointerId)}catch(_){}
+},{passive:false});
+underlineLayer.addEventListener('pointerup',e=>{
+ if(!S.ulOn || underlineStart===null)return;
+ e.preventDefault();
+ const el=wordAtPoint(e.clientX,e.clientY);
+ const end=el?Number(el.dataset.w):underlineStart;
+ const begin=underlineStart; underlineStart=null;
+ if(Number.isFinite(begin)&&Number.isFinite(end))addUnderlineRange(begin,end);
+},{passive:false});
+underlineLayer.addEventListener('pointercancel',()=>{underlineStart=null});
+$('#ulColor').addEventListener('change',e=>{S.ulc=e.target.value;save();render(1)});
+
 
 async function books(){return(await tx('b','readonly',s=>s.getAll()))||[]}
 async function lists(){const bs=await books(),bl=$('#bl');bl.innerHTML='';
@@ -258,10 +273,27 @@ async function gsend(){const q=$('#gi').value.trim();if(!q)return;$('#gi').value
 $('#gs').onclick=gsend;$('#gi').onkeydown=e=>{if(e.key=='Enter'||e.keyCode==13)gsend()};
 $('#gkb').onclick=()=>{const v=$('#gk').value.trim();if(!v)return;S.gk=v;save();$('#gk').value='';$('#gk').placeholder='Key saved ✓ (paste to replace)'};
 if(S.gk)$('#gk').placeholder='Key saved ✓ (paste to replace)';
-/* Gemini browser (dock): native WebView in Android; iframe fallback for compatible pages in a browser. */
-function brGo(){const q=$('#bq').value.trim();if(!q)return;const u=/^https?:\/\//i.test(q)?q:/^[^\s]+\.[^\s]{2,}$/.test(q)?'https://'+q:'https://www.google.com/search?q='+encodeURIComponent(q);const frame=$('#browserFrame');try{if(window.Gem&&typeof Gem.load==='function'){Gem.load(u);return}}catch(e){showErr('Browser bridge: '+e.message)}try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Browser){window.Capacitor.Plugins.Browser.open({url:u});return}}catch(e){showErr('Browser open: '+e.message)}frame.hidden=true;frame.src='about:blank';let note=$('#browserFallback');if(!note){note=document.createElement('div');note.id='browserFallback';note.style.cssText='padding:14px;font:12px monospace;line-height:1.6';$('#br').append(note)}note.innerHTML='This site blocks in-app embedding. <button id=browserOpen>OPEN IN BROWSER</button>';$('#browserOpen').onclick=()=>{try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Browser)window.Capacitor.Plugins.Browser.open({url:u});else window.open(u,'_blank','noopener')}catch(e){showErr('Open link: '+e.message)}}}
-$('#gb').onclick=()=>{const br=$('#br');br.hidden=false;layout();const u='https://gemini.google.com/app';$('#bq').value=u;const r=$('#bb').getBoundingClientRect(),b=$('#br').getBoundingClientRect();try{if(window.Gem&&typeof Gem.open==='function'){Gem.open(Math.round(r.bottom),Math.round(innerHeight-b.bottom),u);return}}catch(e){showErr('Browser bridge: '+e.message)}brGo()};
-$('#bk2').onclick=()=>{try{if(window.Gem&&typeof Gem.close==='function')Gem.close()}catch(e){}$('#browserFrame').hidden=true;$('#browserFrame').src='about:blank';$('#br').hidden=true;const note=$('#browserFallback');if(note)note.remove();layout()};
+/* Gemini browser: stay inside the app; never call the legacy Gem native bridge.
+   Some sites (including Gemini) block iframe embedding, so show an explicit fallback. */
+function brGo(){
+ const q=$('#bq').value.trim(); if(!q)return;
+ const u=/^https?:\/\//i.test(q)?q:/^[^\s]+\.[^\s]{2,}$/.test(q)?'https://'+q:'https://www.google.com/search?q='+encodeURIComponent(q);
+ const frame=$('#browserFrame'); let note=$('#browserFallback');
+ if(note)note.remove();
+ frame.dataset.loaded=''; frame.hidden=false; frame.src=u;
+ frame.onerror=()=>showBrowserFallback(u);
+ // iframe errors are not consistently reported by Android WebView; provide a visible escape hatch.
+ setTimeout(()=>{if(!$('#br').hidden && !frame.dataset.loaded)showBrowserFallback(u)},1800);
+}
+function showBrowserFallback(u){
+ let note=$('#browserFallback'); if(!note){note=document.createElement('div');note.id='browserFallback';note.style.cssText='padding:14px;font:12px monospace;line-height:1.6;overflow:auto';$('#br').append(note)}
+ note.textContent='This site may block in-app display. Open it externally if the page stays blank. ';
+ const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener noreferrer';a.textContent='OPEN LINK';a.style.cssText='display:inline-block;color:var(--fg);border:2px solid var(--fg);padding:8px;margin-top:8px';
+ a.onclick=(e)=>{e.preventDefault();try{window.open(u,'_blank','noopener')}catch(err){showErr('Could not open external page: '+err.message)}};note.append(a);
+}
+$('#gb').onclick=()=>{const br=$('#br');br.hidden=false;layout();$('#bq').value='https://gemini.google.com/app';brGo()};
+$('#bk2').onclick=()=>{$('#browserFrame').hidden=true;$('#browserFrame').src='about:blank';$('#browserFrame').dataset.loaded='';$('#br').hidden=true;const note=$('#browserFallback');if(note)note.remove();layout()};
+$('#browserFrame').addEventListener('load',()=>{$('#browserFrame').dataset.loaded='1'});
 $('#bq').onkeydown=e=>{if(e.key==='Enter'){brGo();$('#bq').blur()}};$('#bgo').onclick=brGo;
 layout();apply();document.body.classList.toggle('underline-mode',!!S.ulOn);$('#ulToggle').classList.toggle('on',!!S.ulOn);if(S.locked)setLock(1);loadPlaylists().catch(e=>showErr('Playlist startup: '+e.message));loadFonts();if(S.cur)openBook(S.cur);else lists();
 window.BOOT=1;
