@@ -9,8 +9,29 @@ jobs:
         with: {node-version: 20}
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: 17}
-      - run: npm install
-      - run: |
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f package.json ]; then
+            APP_DIR="."
+          else
+            APP_DIR="$(find . -maxdepth 5 -type f -name package.json -not -path '*/node_modules/*' -printf '%h\n' | head -n 1)"
+          fi
+          if [ -z "$APP_DIR" ] || [ ! -f "$APP_DIR/index.html" ]; then
+            echo "ERROR: Could not find the app folder containing both package.json and index.html."
+            echo "Repository files at shallow depth:"
+            find . -maxdepth 4 -type f \( -name index.html -o -name package.json \) -print
+            exit 1
+          fi
+          echo "APP_DIR=$APP_DIR" >> "$GITHUB_ENV"
+          cd "$APP_DIR"
+          npm install
+      - name: Build APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
           mkdir -p www
           cp index.html www/index.html
           cp node_modules/pdfjs-dist/build/pdf.min.js www/
