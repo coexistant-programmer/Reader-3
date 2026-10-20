@@ -9,18 +9,18 @@ svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.4;stroke
 .ic{width:40px;height:40px;border:3px solid var(--fg);background:var(--bg);color:var(--fg);display:grid;place-items:center;box-shadow:3px 3px 0 var(--fg);padding:0}
 .ic:active,.locked #lk{background:var(--fg);color:var(--bg)}.locked #st{opacity:.25}
 #title{flex:1;text-align:center;font-weight:900;font-size:13px;letter-spacing:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border:2px solid var(--fg);padding:8px 4px;transform:skew(-4deg)}
-#vw{position:fixed;left:0;right:0;top:56px;bottom:calc(env(safe-area-inset-bottom) + 57px);overflow:hidden}#vw.orig{overflow:auto;display:flex}
+#vw{position:fixed;left:0;right:0;top:0;bottom:0;overflow:hidden;padding-top:56px;padding-bottom:calc(env(safe-area-inset-bottom) + 58px);touch-action:pan-y}#vw.orig{overflow:auto;display:flex}
 #pw{margin:auto auto 0;flex:none}#cv{display:block;border:3px solid var(--fg);box-shadow:5px 5px 0 var(--fg)}
 #sheet{position:absolute;inset:0;overflow:hidden;isolation:isolate}
 #col{position:absolute;column-fill:auto;column-gap:0}.para{display:block}#ov{position:absolute;inset:0;pointer-events:none;display:none}
-.hl{border-radius:2px}
+.hl{border-radius:2px}.underlined{ text-decoration-line:underline;text-decoration-thickness:2px;text-decoration-color:var(--ulc,#e6d98a);text-underline-offset:3px } body.underline-mode #col [data-w]{touch-action:none} #dock{gap:3px} #dm{gap:4px} #ulColor{box-shadow:2px 2px 0 var(--fg)}
 .fold{display:inline-block;vertical-align:baseline;width:fit-content;max-width:42%;height:14px;line-height:14px;margin:0 0 0 5px;padding:0 11px 0 5px;font:9px/14px 'Courier New',monospace;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;break-inside:avoid;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,0 100%);transform:translateY(-1px);pointer-events:auto}
 .fold:after{content:"";position:absolute;right:0;top:0;width:7px;height:7px;background:linear-gradient(225deg,transparent 50%,rgba(0,0,0,.4) 50%)}
 #dock{position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 8px);z-index:6;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
 #dock>*{pointer-events:auto}#dm{display:flex;gap:8px}
 .nav{width:44px;height:44px;opacity:.5;background:var(--bg);border:3px solid var(--fg);display:grid;place-items:center;color:var(--fg);padding:0;box-shadow:3px 3px 0 var(--fg)}
 .nav.sm{width:38px;height:38px}.nav:active,.nav.on{opacity:1;background:var(--fg);color:var(--bg)}
-#pn{position:fixed;left:0;right:0;bottom:0;top:46vh;z-index:20;overflow:auto;background:var(--bg);border-top:5px solid var(--fg);padding:10px 14px 40px;background-image:repeating-conic-gradient(from 0deg at 50% 0,transparent 0 3deg,rgba(128,128,128,.12) 3deg 3.6deg)}
+#pn{position:fixed;left:0;right:0;bottom:0;top:0;z-index:20;overflow:auto;background:var(--bg);border-top:5px solid var(--fg);padding:10px 14px 40px;background-image:repeating-conic-gradient(from 0deg at 50% 0,transparent 0 3deg,rgba(128,128,128,.12) 3deg 3.6deg)}
 #sw{position:fixed;left:8px;right:8px;top:60px;z-index:19;max-height:50vh;overflow:auto;background:var(--bg);border:3px solid var(--fg);box-shadow:5px 5px 0 var(--fg)}
 h2{background:var(--fg);color:var(--bg);padding:4px 10px;margin:16px 0 8px;font-size:14px;letter-spacing:3px;transform:skew(-6deg)}
 h1{font-size:24px;letter-spacing:4px;border-bottom:5px solid var(--fg);padding-bottom:4px}h1 small{font-size:11px}
@@ -29,7 +29,7 @@ input[type=range]{flex:1;accent-color:var(--fg)}select,button,.btn{font:inherit;
 button:active{background:var(--fg);color:var(--bg)}input[type=color]{width:44px;height:34px;border:3px solid var(--fg);background:none;padding:0}
 .it{border:2px solid var(--fg);padding:8px;margin:6px 0;font-size:13px}.it.on{background:var(--fg);color:var(--bg)}
 textarea,input[type=text],input[type=password]{-webkit-user-select:text;user-select:text;font:inherit;border:3px solid var(--fg);background:var(--bg);color:var(--fg);padding:8px;min-width:0;border-radius:0}
-#np{position:fixed;left:0;right:0;z-index:8;display:flex;flex-direction:column;gap:8px;padding:8px;background:var(--bg)}
+#np{position:fixed;left:8px;right:8px;z-index:21;display:flex;flex-direction:column;gap:8px;padding:8px;background:var(--bg)}
 #np .tb{display:flex;align-items:center;justify-content:space-between;font-weight:900;letter-spacing:2px}
 #nx{flex:1;resize:none;font-size:16px;line-height:1.5}#na{align-self:center;width:52px;height:52px;display:grid;place-items:center;padding:0}
 #gc{position:fixed;left:8px;right:8px;z-index:18;border:2px solid var(--fg);background:var(--bg);box-shadow:3px 3px 0 var(--fg);display:flex;flex-direction:column;max-height:30vh}
@@ -59,11 +59,15 @@ textarea,input[type=text],input[type=password]{-webkit-user-select:text;user-sel
 <div id="vw" class="orig"><div id="pw"><canvas id="cv"></canvas></div><div id="sheet" hidden><div id="col"></div><div id="ov"></div></div></div>
 <div id="sw" hidden></div>
 <div id="dock"><button class="nav" id="pl"><svg viewBox="0 0 24 24"><path d="M17 3L5 12l12 9-4-9z" fill="currentColor"/></svg></button>
-<div id="dm"><button class="nav sm" id="nt"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5zM15 3v4h4M8 12h8M8 16h5"/></svg></button>
+<div id="dm"><button class="nav sm" id="nt" aria-label="Notes"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5zM15 3v4h4M8 12h8M8 16h5"/></svg></button>
+<button class="nav sm" id="nfDock" aria-label="Add sticky note"><svg viewBox="0 0 24 24"><path d="M5 3h14v18H5zM8 8h8M8 12h8M8 16h4"/><path d="M16 16h3v5"/></svg></button>
+<button class="nav sm" id="ulToggle" aria-label="Underline mode"><svg viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0012 0V3M4 21h16"/></svg></button>
+<input type="color" id="ulColor" aria-label="Underline color" value="#e6d98a" style="width:30px;height:30px;padding:0;border:2px solid var(--fg);align-self:center">
+<button class="nav sm" id="ulUndo" aria-label="Undo last underline word"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-2"/><path d="M8 17h8"/></svg></button>
 <button class="nav sm" id="mt"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
 <button class="nav sm" id="gb"><svg viewBox="0 0 24 24"><path d="M12 2C12.8 8 16 11.2 22 12C16 12.8 12.8 16 12 22C11.2 16 8 12.8 2 12C8 11.2 11.2 8 12 2Z" fill="currentColor"/></svg></button></div>
 <button class="nav" id="pr"><svg viewBox="0 0 24 24"><path d="M7 3l12 9-12 9 4-9z" fill="currentColor"/></svg></button></div>
-<div id="np" hidden><div class="tb"><span id="nc">0/0</span><button class="ic" id="nd" aria-label="delete"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>
+<div id="np" hidden><div class="tb"><span id="nc">0/0</span><div style="display:flex;gap:6px"><button class="ic" id="nd" aria-label="delete"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button><button class="ic" id="nclose" aria-label="close notes">✕</button></div></div>
 <textarea id="nx" placeholder="No notes. Tap + below."></textarea><div id="nh" aria-label="Saved notes history"></div><button class="ic" id="na" aria-label="add"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg></button></div>
 <div id="musicWindow" hidden><div id="musicHead"><span>♫ MUSIC / PLAYLISTS</span><button id="musicClose" aria-label="close">✕</button></div><div id="playlistBar"><select id="playlistSelect" aria-label="Playlist"></select><button id="newPlaylist">+ LIST</button><button id="addSongs">+ SONGS</button><input id="playlistFiles" type="file" accept="audio/*" multiple hidden></div><div id="playlistSongs"></div><div id="musicControls"><button id="musicPrev">⏮</button><button id="musicPlay">▶</button><button id="musicNext">⏭</button></div></div>
 <div id="gc" hidden><div id="gh"><span>✦ GEMINI</span><button id="gx">✕</button></div><div id="gl"></div><div id="gr"><input type="text" id="gi" placeholder="Ask Gemini…" enterkeyhint="send"><button id="gs">➤</button></div></div>
@@ -106,7 +110,7 @@ q('#st').onclick=()=>{if(!L())q('#pn').hidden=false};q('#cl').onclick=()=>q('#pn
 if(typeof pdfjsLib=='undefined')showErr('pdf.min.js did not load');
 const $=s=>document.querySelector(s),COL=['#e6d98a','#e4aaa2','#a9c9de','#b4d6ae'];
 const BASE=['serif','sans-serif','sans-serif-condensed','sans-serif-light','sans-serif-medium','sans-serif-thin','monospace','serif-monospace','cursive','casual'];
-const D={mode:'text',fs:20,lh:1.6,ls:0,ws:0,ps:8,mg:16,br:.85,ff:'serif',al:'left',ink:'#1a1a1a',ink2:'#7a1f1f',grad:0,paper:'#d9d5cb',inv:0,dark:0,pin:'',locked:0,cur:null,b:{},mp:{x:10,y:200},ti:0,tt:0,mv:0};
+const D={mode:'text',fs:20,lh:1.6,ls:0,ws:0,ps:8,mg:16,br:.85,ff:'serif',al:'left',ink:'#1a1a1a',ink2:'#7a1f1f',grad:0,paper:'#d9d5cb',inv:0,dark:0,pin:'',locked:0,cur:null,b:{},mp:{x:10,y:200},ti:0,tt:0,mv:0,ulc:'#e6d98a',ulOn:0};
 let S;try{S=Object.assign({},D,JSON.parse(localStorage.S||'{}'))}catch(e){S=Object.assign({},D)}
 if(!S.v3){S.mode='text';S.v3=1}
 const save=()=>localStorage.S=JSON.stringify(S);
@@ -136,6 +140,7 @@ function typeset(paras){const vw=$('#vw'),col=$('#col');CW=Math.max(80,vw.client
  col.textContent='';let w=0;const f=document.createDocumentFragment();
  paras.forEach(pr=>{const d=document.createElement('div');d.className='para';d.style.marginBottom=S.ps+'px';pr.forEach(t=>{const s=document.createElement('span');s.dataset.w=w++;s.textContent=t;d.append(s,' ')});f.append(d)});
  col.append(f);const ws=col.querySelectorAll('[data-w]'),o=col.getBoundingClientRect().left,ci=r=>Math.floor((r.left-o+2)/CW);
+ const underlineWords=B().ul||[]; ws.forEach((el,idx)=>{el.classList.toggle('underlined',underlineWords.some(u=>u.p===P&&u.w===idx));el.style.setProperty('--ulc',((underlineWords.find(u=>u.p===P&&u.w===idx)||{}).c)||S.ulc||'#e6d98a')});
  B().nt.map((n,i)=>[n,i]).filter(x=>x[0].p==P&&x[0].k=='w'&&ws[x[0].w]).sort((a,b)=>a[0].w-b[0].w).forEach(([n,i])=>{
   const c=COL[n.c%4],s=ws[n.w];s.className='hl';s.style.background=c;s.style.color='#222';
   const r0=s.getBoundingClientRect(),c0=ci(r0);let j=n.w;
@@ -160,12 +165,23 @@ function go(d){if(!$('#np').hidden){const n=QN();if(n.length){S.qi=Math.min(Math
  if(!doc)return;if(!$('#sheet').hidden){if(d>0&&SH<MS-1){SH++;return shift()}if(d<0&&SH>0){SH--;return shift()}}
  const n=P+d;if(n<1||n>N)return;P=n;SH=d>0?0:-1;render()}
 $('#pl').onclick=()=>go(-1);$('#pr').onclick=()=>go(1);
-let sx=0;$('#vw').ontouchstart=e=>sx=e.touches[0].clientX;$('#vw').ontouchend=e=>{const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>90)go(d<0?1:-1)};
+let sx=0;$('#vw').ontouchstart=e=>{if(!S.ulOn){e.preventDefault();return}sx=e.touches[0].clientX};$('#vw').ontouchend=e=>{if(!S.ulOn)e.preventDefault()};
 let st;$('#vw').onscroll=()=>{clearTimeout(st);st=setTimeout(()=>{if(doc){B().sy=$('#vw').scrollTop;save()}},300)};
 function edit(i){const n=B().nt[i],t=prompt('Note (empty = delete)',n.t);if(t===null)return;t?n.t=t:B().nt.splice(i,1);save();render(1);lists()}
-$('#nf').onclick=()=>{$('#pn').hidden=true;if(!doc)return;if($('#sheet').hidden)return flash('FOLDED NOTES NEED EDITED MODE');placing=1;$('#title').textContent='TAP A WORD FOR THE NOTE'};
+function startStickyNote(){$('#pn').hidden=true;if(!doc)return;if($('#sheet').hidden)return flash('FOLDED NOTES NEED EDITED MODE');placing=1;$('#title').textContent='TAP A WORD FOR THE NOTE'};$('#nf').onclick=startStickyNote;$('#nfDock').onclick=startStickyNote;
 $('#vw').addEventListener('click',e=>{if(!placing)return;placing=0;setTitle();const s=e.target.closest('[data-w]');if(!s)return;
  const t=prompt('Sticky note');if(!t)return;const b=B();b.nt.push({p:P,k:'w',w:+s.dataset.w,t,c:b.nt.length%4});save();render(1);lists()});
+// Underline selection is the only touch interaction enabled on the text page.
+let underlineStart=null;
+function wordAtPoint(x,y){const el=document.elementFromPoint(x,y);return el&&el.closest?el.closest('#col [data-w]'):null}
+function addUnderlineRange(a,b){if(!doc||$('#sheet').hidden)return;const lo=Math.min(a,b),hi=Math.max(a,b),arr=B().ul||(B().ul=[]);for(let w=lo;w<=hi;w++)if(!arr.some(u=>u.p===P&&u.w===w))arr.push({p:P,w,c:S.ulc||'#e6d98a'});save();render(1)}
+$('#ulToggle').onclick=()=>{S.ulOn=S.ulOn?0:1;save();document.body.classList.toggle('underline-mode',!!S.ulOn);$('#ulToggle').classList.toggle('on',!!S.ulOn);flash(S.ulOn?'UNDERLINE ON':'UNDERLINE OFF')};
+$('#ulColor').value=S.ulc||'#e6d98a';$('#ulColor').oninput=e=>{S.ulc=e.target.value;save();render(1)};
+$('#ulUndo').onclick=()=>{const a=B().ul||[];for(let i=a.length-1;i>=0;i--){if(a[i].p===P){a.splice(i,1);break}}save();render(1)};
+$('#col').addEventListener('pointerdown',e=>{if(!S.ulOn)return;const el=e.target.closest('[data-w]');if(!el)return;e.preventDefault();underlineStart=+el.dataset.w;try{el.setPointerCapture(e.pointerId)}catch(_){}},{passive:false});
+$('#col').addEventListener('pointerup',e=>{if(!S.ulOn||underlineStart===null)return;const el=wordAtPoint(e.clientX,e.clientY);const end=el?+el.dataset.w:underlineStart;addUnderlineRange(underlineStart,end);underlineStart=null;e.preventDefault()},{passive:false});
+$('#col').addEventListener('pointercancel',()=>underlineStart=null);
+
 async function books(){return(await tx('b','readonly',s=>s.getAll()))||[]}
 async function lists(){const bs=await books(),bl=$('#bl');bl.innerHTML='';
  bs.forEach(b=>{const d=document.createElement('div');d.className='it'+(b.id==S.cur?' on':'');d.textContent='▣ '+b.name+(S.b[b.id]?'  (p.'+S.b[b.id].p+')':'');d.onclick=()=>{openBook(b.id);$('#pn').hidden=true};bl.append(d)});
@@ -221,7 +237,8 @@ function renderNoteHistory(){const box=$('#nh');if(!box)return;box.innerHTML='';
 function npShow(){const n=QN();S.qi=Math.min(Math.max(S.qi||0,0),Math.max(0,n.length-1));$('#nc').textContent=n.length?(S.qi+1)+'/'+n.length:'0/0';$('#nx').value=n.length?n[S.qi].t:'';$('#nx').disabled=!n.length;renderNoteHistory()}
 function requestNotesFolder(){if(notesFolderReady)return;if(window.NotesFolder&&typeof window.NotesFolder.choose==='function'){try{if(typeof window.NotesFolder.hasFolder==='function'&&window.NotesFolder.hasFolder()){notesFolderReady=true;syncNotesFile(true);return}window.NotesFolder.choose()}catch(e){showErr('Documents permission: '+e.message)}}else{showErr('Choose a Documents folder from the installed Android app to save notes there.')}}
 window.onNotesFolderSelected=ok=>{notesFolderReady=!!ok;if(ok){persistNotes();syncNotesFile(true);flash('NOTES FOLDER READY')}else flash('DOCUMENTS PERMISSION NOT GRANTED')};window.onNotesFileError=m=>showErr('Notes file: '+m);
-$('#nt').onclick=()=>{const np=$('#np');np.hidden=!np.hidden;$('#nt').classList.toggle('on',!np.hidden);if(!np.hidden){layout();npShow();requestNotesFolder()}else{persistNotes();syncNotesFile(true);layout()}};
+function closeNotes(){persistNotes();syncNotesFile(true);$('#np').hidden=true;$('#nt').classList.remove('on');layout()}
+$('#nclose').onclick=closeNotes;$('#nt').onclick=()=>{const np=$('#np');if(!np.hidden){closeNotes();return}np.hidden=false;$('#nt').classList.add('on');layout();npShow();requestNotesFolder()};
 $('#nx').oninput=()=>{const n=QN();if(n.length){n[S.qi].t=$('#nx').value;persistNotes();$('#nc').textContent=(S.qi+1)+'/'+n.length}};
 $('#nd').onclick=()=>{const n=QN();if(!n.length)return;n.splice(S.qi,1);persistNotes();npShow()};
 $('#na').onclick=()=>{QN().push({id:Date.now(),t:''});S.qi=QN().length-1;persistNotes();npShow();$('#nx').disabled=false;$('#nx').focus()};
@@ -242,10 +259,10 @@ $('#gs').onclick=gsend;$('#gi').onkeydown=e=>{if(e.key=='Enter'||e.keyCode==13)g
 $('#gkb').onclick=()=>{const v=$('#gk').value.trim();if(!v)return;S.gk=v;save();$('#gk').value='';$('#gk').placeholder='Key saved ✓ (paste to replace)'};
 if(S.gk)$('#gk').placeholder='Key saved ✓ (paste to replace)';
 /* Gemini browser (dock): native WebView in Android; iframe fallback for compatible pages in a browser. */
-function brGo(){const q=$('#bq').value.trim();if(!q)return;const u=/^https?:\/\//i.test(q)?q:/^[^\s]+\.[^\s]{2,}$/.test(q)?'https://'+q:'https://www.google.com/search?q='+encodeURIComponent(q);const frame=$('#browserFrame');try{if(window.Gem&&typeof Gem.load==='function'){Gem.load(u);return}}catch(e){showErr('Browser bridge: '+e.message)}frame.hidden=false;frame.src=u}
-$('#gb').onclick=()=>{const br=$('#br');br.hidden=false;layout();$('#bq').value='';const r=$('#bb').getBoundingClientRect(),b=$('#br').getBoundingClientRect();const frame=$('#browserFrame');frame.hidden=true;frame.src='about:blank';try{if(window.Gem&&typeof Gem.open==='function')Gem.open(Math.round(r.bottom),Math.round(innerHeight-b.bottom),'https://gemini.google.com/app');else{frame.hidden=false;frame.src='https://gemini.google.com/app'}}catch(e){frame.hidden=false;frame.src='https://gemini.google.com/app';showErr('Browser fallback: '+e.message)}};
-$('#bk2').onclick=()=>{try{if(window.Gem&&typeof Gem.close==='function')Gem.close()}catch(e){}$('#browserFrame').hidden=true;$('#browserFrame').src='about:blank';$('#br').hidden=true;layout()};
+function brGo(){const q=$('#bq').value.trim();if(!q)return;const u=/^https?:\/\//i.test(q)?q:/^[^\s]+\.[^\s]{2,}$/.test(q)?'https://'+q:'https://www.google.com/search?q='+encodeURIComponent(q);const frame=$('#browserFrame');try{if(window.Gem&&typeof Gem.load==='function'){Gem.load(u);return}}catch(e){showErr('Browser bridge: '+e.message)}try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Browser){window.Capacitor.Plugins.Browser.open({url:u});return}}catch(e){showErr('Browser open: '+e.message)}frame.hidden=true;frame.src='about:blank';let note=$('#browserFallback');if(!note){note=document.createElement('div');note.id='browserFallback';note.style.cssText='padding:14px;font:12px monospace;line-height:1.6';$('#br').append(note)}note.innerHTML='This site blocks in-app embedding. <button id=browserOpen>OPEN IN BROWSER</button>';$('#browserOpen').onclick=()=>{try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Browser)window.Capacitor.Plugins.Browser.open({url:u});else window.open(u,'_blank','noopener')}catch(e){showErr('Open link: '+e.message)}}}
+$('#gb').onclick=()=>{const br=$('#br');br.hidden=false;layout();const u='https://gemini.google.com/app';$('#bq').value=u;const r=$('#bb').getBoundingClientRect(),b=$('#br').getBoundingClientRect();try{if(window.Gem&&typeof Gem.open==='function'){Gem.open(Math.round(r.bottom),Math.round(innerHeight-b.bottom),u);return}}catch(e){showErr('Browser bridge: '+e.message)}brGo()};
+$('#bk2').onclick=()=>{try{if(window.Gem&&typeof Gem.close==='function')Gem.close()}catch(e){}$('#browserFrame').hidden=true;$('#browserFrame').src='about:blank';$('#br').hidden=true;const note=$('#browserFallback');if(note)note.remove();layout()};
 $('#bq').onkeydown=e=>{if(e.key==='Enter'){brGo();$('#bq').blur()}};$('#bgo').onclick=brGo;
-layout();apply();if(S.locked)setLock(1);loadPlaylists().catch(e=>showErr('Playlist startup: '+e.message));loadFonts();if(S.cur)openBook(S.cur);else lists();
+layout();apply();document.body.classList.toggle('underline-mode',!!S.ulOn);$('#ulToggle').classList.toggle('on',!!S.ulOn);if(S.locked)setLock(1);loadPlaylists().catch(e=>showErr('Playlist startup: '+e.message));loadFonts();if(S.cur)openBook(S.cur);else lists();
 window.BOOT=1;
 </script></body></html>
