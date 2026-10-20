@@ -18,10 +18,10 @@ jobs:
           else
             APP_DIR="$(find . -maxdepth 5 -type f -name package.json -not -path '*/node_modules/*' -printf '%h\n' | head -n 1)"
           fi
-          if [ -z "$APP_DIR" ] || [ ! -f "$APP_DIR/index.html" ]; then
-            echo "ERROR: Could not find the app folder containing both package.json and index.html."
+          if [ -z "$APP_DIR" ] || { [ ! -f "$APP_DIR/index.html" ] && [ ! -f "$APP_DIR/www/index.html" ]; }; then
+            echo "ERROR: Could not find an app folder containing package.json and either index.html or www/index.html."
             echo "Repository files at shallow depth:"
-            find . -maxdepth 4 -type f \( -name index.html -o -name package.json \) -print
+            find . -maxdepth 5 -type f \( -name index.html -o -name package.json \) -print
             exit 1
           fi
           echo "APP_DIR=$APP_DIR" >> "$GITHUB_ENV"
@@ -33,7 +33,14 @@ jobs:
           set -euo pipefail
           cd "$APP_DIR"
           mkdir -p www
-          cp index.html www/index.html
+          if [ -f index.html ]; then
+            cp index.html www/index.html
+          elif [ ! -f www/index.html ]; then
+            echo "ERROR: Neither index.html nor www/index.html exists in $APP_DIR"
+            exit 1
+          else
+            echo "Using existing www/index.html"
+          fi
           cp node_modules/pdfjs-dist/build/pdf.min.js www/
           cp node_modules/pdfjs-dist/build/pdf.worker.min.js www/
           npx cap add android
