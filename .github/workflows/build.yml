@@ -3,219 +3,26 @@ on: [push, workflow_dispatch]
 jobs:
   apk:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: 20}
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: 17}
-      - name: Install dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -f package.json ]; then
-            APP_DIR="."
-          else
-            APP_DIR="$(find . -maxdepth 5 -type f -name package.json -not -path '*/node_modules/*' -printf '%h\n' | head -n 1)"
-          fi
-          if [ -z "$APP_DIR" ] || { [ ! -f "$APP_DIR/index.html" ] && [ ! -f "$APP_DIR/www/index.html" ]; }; then
-            echo "ERROR: Could not find an app folder containing package.json and either index.html or www/index.html."
-            echo "Repository files at shallow depth:"
-            find . -maxdepth 5 -type f \( -name index.html -o -name package.json \) -print
-            exit 1
-          fi
-          echo "APP_DIR=$APP_DIR" >> "$GITHUB_ENV"
-          cd "$APP_DIR"
-          npm install
-      - name: Build APK
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "$APP_DIR"
-          mkdir -p www
-          if [ -f index.html ]; then
-            cp index.html www/index.html
-          elif [ ! -f www/index.html ]; then
-            echo "ERROR: Neither index.html nor www/index.html exists in $APP_DIR"
-            exit 1
-          else
-            echo "Using existing www/index.html"
-          fi
+      - run: npm install
+      - run: |
           cp node_modules/pdfjs-dist/build/pdf.min.js www/
           cp node_modules/pdfjs-dist/build/pdf.worker.min.js www/
           npx cap add android
           mkdir -p android/app/src/main/java/com/manga/reader
-          cat > android/app/src/main/java/com/manga/reader/MainActivity.java <<'JAVA'
-          package com.manga.reader;
-
-          import android.app.Activity;
-          import android.content.Intent;
-          import android.database.Cursor;
-          import android.net.Uri;
-          import android.os.Build;
-          import android.os.Bundle;
-          import android.provider.DocumentsContract;
-          import android.view.View;
-          import android.view.ViewGroup;
-          import android.view.WindowManager;
-          import android.webkit.CookieManager;
-          import android.webkit.JavascriptInterface;
-          import android.webkit.WebResourceRequest;
-          import android.webkit.WebView;
-          import android.webkit.WebViewClient;
-          import android.widget.FrameLayout;
-          import com.getcapacitor.BridgeActivity;
-          import java.io.OutputStream;
-          import java.nio.charset.StandardCharsets;
-
-          public class MainActivity extends BridgeActivity {
-            private static final int REQUEST_NOTES_FOLDER = 4201;
-            private WebView browser;
-            private ViewGroup root;
-
-            @Override public void onCreate(Bundle state) {
-              super.onCreate(state);
-              getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-              WebView app = getBridge().getWebView();
-              root = (ViewGroup) app.getParent();
-              app.addJavascriptInterface(new Object() {
-                @JavascriptInterface public void lock() {
-                  runOnUiThread(() -> { try { startLockTask(); } catch (Exception ignored) {} });
-                }
-                @JavascriptInterface public void unlock() {
-                  runOnUiThread(() -> { try { stopLockTask(); } catch (Exception ignored) {} });
-                }
-              }, "Lock");
-              app.addJavascriptInterface(new Object() {
-                @JavascriptInterface public void open(int top, int bottom, String url) {
-                  runOnUiThread(() -> showBrowser(top, bottom, url));
-                }
-                @JavascriptInterface public void load(String url) {
-                  runOnUiThread(() -> { if (browser != null && browser.getVisibility() == View.VISIBLE) browser.loadUrl(url); });
-                }
-                @JavascriptInterface public void close() {
-                  runOnUiThread(() -> { if (browser != null) browser.setVisibility(View.GONE); });
-                }
-              }, "Gem");
-              app.addJavascriptInterface(new NotesBridge(), "NotesFolder");
-            }
-
-            private void showBrowser(int top, int bottom, String url) {
-              if (browser == null) {
-                browser = new WebView(this);
-                browser.setBackgroundColor(android.graphics.Color.rgb(214, 214, 209));
-                browser.getSettings().setJavaScriptEnabled(true);
-                browser.getSettings().setDomStorageEnabled(true);
-                browser.getSettings().setDatabaseEnabled(true);
-                browser.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-                browser.getSettings().setSupportMultipleWindows(false);
-                browser.getSettings().setLoadsImagesAutomatically(true);
-                CookieManager.getInstance().setAcceptCookie(true);
-                CookieManager.getInstance().setAcceptThirdPartyCookies(browser, true);
-                browser.setWebViewClient(new WebViewClient() {
-                  @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) { return false; }
-                });
-                FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                  ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                root.addView(browser, lp);
-              }
-              FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-              lp.topMargin = Math.max(0, top);
-              lp.bottomMargin = Math.max(0, bottom);
-              browser.setLayoutParams(lp);
-              browser.setVisibility(View.VISIBLE);
-              browser.bringToFront();
-              browser.loadUrl(url);
-            }
-
-            private final class NotesBridge {
-              @JavascriptInterface public boolean hasFolder() {
-                String saved = getSharedPreferences("reader", MODE_PRIVATE).getString("notes_tree", null);
-                if (saved == null) return false;
-                try {
-                  Uri uri = Uri.parse(saved);
-                  for (android.content.UriPermission permission : getContentResolver().getPersistedUriPermissions()) {
-                    if (uri.equals(permission.getUri()) && permission.isReadPermission() && permission.isWritePermission()) return true;
-                  }
-                  return false;
-                } catch (Exception e) { return false; }
-              }
-
-              @JavascriptInterface public void choose() {
-                runOnUiThread(() -> {
-                  Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                  intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
-                                  Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-                  if (Build.VERSION.SDK_INT >= 26) {
-                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI,
-                      Uri.parse("content://com.android.externalstorage.documents/tree/primary%3ADocuments"));
-                  }
-                  startActivityForResult(intent, REQUEST_NOTES_FOLDER);
-                });
-              }
-
-              @JavascriptInterface public void saveNotes(String content) {
-                try {
-                  String saved = getSharedPreferences("reader", MODE_PRIVATE).getString("notes_tree", null);
-                  if (saved == null) { notifyNotesError("Choose a Documents folder first."); return; }
-                  Uri tree = Uri.parse(saved);
-                  Uri rootDoc = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree));
-                  Uri target = null;
-                  Uri children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree));
-                  try (Cursor c = getContentResolver().query(children,
-                      new String[]{DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME},
-                      null, null, null)) {
-                    if (c != null) while (c.moveToNext()) {
-                      if ("Manga Reader Notes.txt".equals(c.getString(1))) {
-                        target = DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0));
-                        break;
-                      }
-                    }
-                  }
-                  if (target == null) target = DocumentsContract.createDocument(getContentResolver(), rootDoc,
-                    "text/plain", "Manga Reader Notes.txt");
-                  if (target == null) { notifyNotesError("Android could not create the notes file."); return; }
-                  try (OutputStream out = getContentResolver().openOutputStream(target, "wt")) {
-                    if (out == null) throw new IllegalStateException("Cannot open notes file");
-                    out.write((content == null ? "" : content).getBytes(StandardCharsets.UTF_8));
-                    out.flush();
-                  }
-                } catch (Exception e) { notifyNotesError(e.getMessage() == null ? "Could not save notes." : e.getMessage()); }
-              }
-            }
-
-            private void notifyNotesError(String message) {
-              final String safe = message.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ");
-              runOnUiThread(() -> { if (getBridge() != null) getBridge().getWebView().evaluateJavascript(
-                "window.onNotesFileError && window.onNotesFileError('" + safe + "')", null); });
-            }
-
-            @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-              super.onActivityResult(requestCode, resultCode, data);
-              if (requestCode != REQUEST_NOTES_FOLDER) return;
-              boolean ok = resultCode == Activity.RESULT_OK && data != null && data.getData() != null;
-              if (ok) {
-                Uri uri = data.getData();
-                try {
-                  getContentResolver().takePersistableUriPermission(uri,
-                    data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
-                  getSharedPreferences("reader", MODE_PRIVATE).edit().putString("notes_tree", uri.toString()).apply();
-                } catch (Exception e) { ok = false; }
-              }
-              final boolean selected = ok;
-              getBridge().getWebView().post(() -> getBridge().getWebView().evaluateJavascript(
-                "window.onNotesFolderSelected && window.onNotesFolderSelected(" + selected + ")", null));
-            }
-
-            @Override public void onBackPressed() {
-              if (browser != null && browser.getVisibility() == View.VISIBLE) {
-                if (browser.canGoBack()) browser.goBack(); else browser.setVisibility(View.GONE);
-              } else super.onBackPressed();
-            }
-          }
-          JAVA
+          cp MainActivity.java android/app/src/main/java/com/manga/reader/MainActivity.java
           npx cap sync android
           cd android && chmod +x gradlew && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with: {name: manga-reader-apk, path: android/app/build/outputs/apk/debug/app-debug.apk}
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          files: android/app/build/outputs/apk/debug/app-debug.apk
