@@ -28,6 +28,8 @@ svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.4;stroke
 #dock>*{pointer-events:auto}#dm{display:grid;grid-template-columns:repeat(5,34px);gap:4px}
 .nav{width:44px;height:44px;opacity:.5;background:var(--bg);border:3px solid var(--fg);display:grid;place-items:center;color:var(--fg);padding:0;box-shadow:3px 3px 0 var(--fg)}
 .nav.sm{width:34px;height:34px}.nav:active,.nav.on{opacity:1;background:var(--fg);color:var(--bg)}
+#bk{position:fixed;z-index:25;right:12px;bottom:calc(env(safe-area-inset-bottom) + 72px);width:48px;height:48px;border-radius:50%;border:3px solid var(--fg);background:var(--bg);color:var(--fg);box-shadow:3px 3px 0 var(--fg);display:none;align-items:center;justify-content:center;padding:0}
+#bk.on{display:flex}#bk:active{background:var(--fg);color:var(--bg)}
 #pn{position:fixed;left:0;right:0;bottom:0;top:46vh;z-index:20;overflow:auto;background:var(--bg);border-top:5px solid var(--fg);padding:10px 14px 40px;background-image:repeating-conic-gradient(from 0deg at 50% 0,transparent 0 3deg,rgba(128,128,128,.12) 3deg 3.6deg)}
 #sw{position:fixed;left:8px;right:8px;top:60px;z-index:19;max-height:50vh;overflow:auto;background:var(--bg);border:3px solid var(--fg);box-shadow:5px 5px 0 var(--fg)}
 h2{background:var(--fg);color:var(--bg);padding:4px 10px;margin:16px 0 8px;font-size:15px;letter-spacing:3px;transform:skew(-6deg)}
@@ -78,6 +80,7 @@ textarea,input[type=text],input[type=password]{-webkit-user-select:text;user-sel
 <button class="nav sm" id="gb"><svg viewBox="0 0 24 24"><path d="M12 2C12.8 8 16 11.2 22 12C16 12.8 12.8 16 12 22C11.2 16 8 12.8 2 12C8 11.2 11.2 8 12 2Z" fill="currentColor"/></svg></button>
 <button class="nav sm" id="tr" aria-label="translator"><b style="font-size:15px;line-height:1">Aঅ</b></button></div>
 <button class="nav" id="pr"><svg viewBox="0 0 24 24"><path d="M7 3l12 9-12 9 4-9z" fill="currentColor"/></svg></button></div>
+<button id="bk" aria-label="back"><svg viewBox="0 0 24 24"><path d="M17 3L5 12l12 9-4-9z" fill="currentColor"/></svg></button>
 <div id="np" hidden><div class="tb"><span id="nc">0/0</span><button class="ic" id="nd" aria-label="delete"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>
 <textarea id="nx" placeholder="No notes. Tap + below."></textarea><button class="ic" id="na" aria-label="add"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg></button></div>
 <div id="tp" hidden><div class="tb"><span>ENGLISH → বাংলা</span><button class="ic" id="tpx" aria-label="close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>
@@ -111,28 +114,43 @@ textarea,input[type=text],input[type=password]{-webkit-user-select:text;user-sel
 <h2>MARKS 筆</h2><div class="row"><span>Pen</span><input type="color" data-k="pc"><input type="range" data-k="pw" min="1" max="14"></div>
 <div class="row"><span>Underline</span><div id="pal"></div></div>
 <h2>FOLDED NOTES 付箋</h2><div style="font-size:13px">Dock folded-note icon, then tap a line. The note sits in the page margin with a dotted line to it.</div><div id="ntl"></div>
-<h2>MUSIC 音</h2><label class="btn" style="display:inline-block">PICK SONGS<input id="fm" type="file" accept="audio/*" multiple hidden></label> <button id="mv">SHOW / HIDE</button> <button id="mrm">REMOVE SONGS</button>
+<h2>MUSIC 音</h2><button class="btn" id="fm">PICK SONGS</button> <button id="mv">SHOW / HIDE</button> <button id="mrm">REMOVE SONGS</button>
+<div style="font-size:12px;margin-top:6px;opacity:.8">Songs are streamed from device storage. No file bytes are copied into the app.</div>
 <h2>GEMINI KEY</h2><div class="row"><input type="password" id="gk" placeholder="Paste Gemini API key" style="flex:1"><button id="gkb">SAVE</button></div>
 <h2>LOCK PIN</h2><button id="cp">CHANGE PIN</button><br><br><button id="cl" style="width:100%">✕ CLOSE</button></div>
 <script>
 function showErr(m){try{let d=document.getElementById('err');if(!d){d=document.createElement('div');d.id='err';d.style.cssText='position:fixed;z-index:99;left:0;right:0;bottom:70px;background:#000;color:#fff;font:11px monospace;padding:6px;white-space:pre-wrap;-webkit-user-select:text;user-select:text';document.body.append(d)}d.textContent+='ERR: '+m+'\n'}catch(e){}}
 addEventListener('error',e=>showErr(e.message+' @'+e.lineno));addEventListener('unhandledrejection',e=>showErr(e.reason&&e.reason.message||e.reason));
 (function(){const q=x=>document.querySelector(x);
-setTimeout(()=>{if(!window.BOOT)showErr('Main script did not start. pdf.js loaded: '+(typeof pdfjsLib!='undefined'))},2500);
-const L=()=>{try{return JSON.parse(localStorage.S||'{}').locked}catch(e){return 0}};
-q('#st').onclick=()=>{if(!L())q('#pn').hidden=false};q('#cl').onclick=()=>q('#pn').hidden=true})();
+setTimeout(()=>{if(!window.BOOT)showErr('Main script did not start. pdf.js loaded: '+(typeof pdfjsLib!='undefined'))},2500);})();
 </script>
 <script src="pdf.min.js"></script><script>
 if(typeof pdfjsLib=='undefined')showErr('pdf.min.js did not load');
 const $=s=>document.querySelector(s),COL=['#e6d98a','#e4aaa2','#a9c9de','#b4d6ae'];
 const BASE=['serif','sans-serif','sans-serif-condensed','sans-serif-light','sans-serif-medium','sans-serif-thin','monospace','serif-monospace','cursive','casual'];
-const D={mode:'page',pc:'#d62828',pw:3,uc:'#d62828',tool:null,fs:26,lh:1.6,ls:0,ws:0,ps:0,mg:16,br:.85,ff:'serif',al:'justify',ink:'#1a1a1a',ink2:'#7a1f1f',grad:0,paper:'#d9d5cb',inv:0,dark:0,pin:'',locked:0,cur:null,b:{},mp:{x:10,y:200},ti:0,tt:0,mv:0};
+const D={mode:'page',pc:'#d62828',pw:3,uc:'#d62828',tool:null,fs:26,lh:1.6,ls:0,ws:0,ps:0,mg:16,br:.85,ff:'serif',al:'justify',ink:'#1a1a1a',ink2:'#7a1f1f',grad:0,paper:'#d9d5cb',inv:0,dark:0,pin:'',locked:0,cur:null,b:{},mp:{x:10,y:200},ti:0,tt:0,mv:0,mtracks:[]};
 let S;try{S=Object.assign({},D,JSON.parse(localStorage.S||'{}'))}catch(e){S=Object.assign({},D)}
 if(!S.v3){S.mode='text';S.v3=1}
 if(!S.v4){S.fs=Math.max(S.fs||0,26);S.v4=1}
 if(!S.v5){S.mode='page';S.v5=1}
 if(!S.v6){if(S.al=='left')S.al='justify';S.ps=0;S.v6=1}
-const save=()=>localStorage.S=JSON.stringify(S);
+if(!Array.isArray(S.mtracks))S.mtracks=[];
+
+/* ---- Notes file helpers (native bridge with localStorage fallback) ---- */
+function saveNotesFile(name,data){try{if(window.Files&&Files.saveNotes)Files.saveNotes(name,JSON.stringify(data))}catch(e){}}
+function loadNotesFile(name){try{if(window.Files&&Files.loadNotes){const s=Files.loadNotes(name);if(s&&s.length)return JSON.parse(s)}}catch(e){}return null}
+let notesFileT;
+function saveNotesToFile(){
+  clearTimeout(notesFileT);
+  notesFileT=setTimeout(()=>{
+    if(S.cur&&S.b[S.cur]){
+      saveNotesFile('edited_'+S.cur,{nt:S.b[S.cur].nt||[],ul:S.b[S.cur].ul||{},uh:S.b[S.cur].uh||[]});
+    }
+    if(S.qn)saveNotesFile('quick',S.qn);
+  },400);
+}
+
+const save=()=>{localStorage.S=JSON.stringify(S);saveNotesToFile()};
 const db=new Promise(r=>{const q=indexedDB.open('r',4);q.onupgradeneeded=()=>{['b','m','f','a'].forEach(n=>q.result.objectStoreNames.contains(n)||q.result.createObjectStore(n,{keyPath:'id'}))};q.onsuccess=()=>r(q.result);q.onerror=()=>{showErr('storage error');r(null)};q.onblocked=()=>showErr('storage blocked')});
 const tx=async(st,m,f)=>{const d=await db;if(!d)return;return new Promise(r=>{const t=d.transaction(st,m);const q=f(t.objectStore(st));t.oncomplete=()=>r(q&&q.result)})};
 try{pdfjsLib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js'}catch(e){showErr('pdf.js: '+e.message)}
@@ -143,9 +161,22 @@ const flash=m=>{$('#title').textContent=m;setTimeout(setTitle,1600)};
 const lum=h=>{const n=parseInt(h.slice(1),16);return((n>>16&255)*.299+(n>>8&255)*.587+(n&255)*.114)/255};
 function layout(){const t=$('#top').offsetHeight,b=Math.max(0,innerHeight-$('#dock').getBoundingClientRect().top);
  [$('#vw'),$('#np'),$('#tp')].forEach(e=>{e.style.top=t+'px';e.style.bottom=b+'px'});$('#gc').style.top=(t+6)+'px';$('#br').style.bottom=b+'px'}
-async function openBook(id){const r=await tx('b','readonly',s=>s.get(id));if(!r)return;
- if(doc)B().sy=$('#vw').scrollTop;if(doc)flushAN();S.cur=id;name=r.name;WC={};TC={};AN=await loadAN(id);
- doc=await pdfjsLib.getDocument({data:await r.blob.arrayBuffer()}).promise;N=doc.numPages;const b=B();P=Math.min(Math.max(b.p||1,1),N);SH=b.s||0;save();render(1);lists()}
+
+async function openBook(id){
+  const r=await tx('b','readonly',s=>s.get(id));if(!r)return;
+  if(doc)B().sy=$('#vw').scrollTop;if(doc)flushAN();
+  S.cur=id;name=r.name;WC={};TC={};
+  // Merge notes from file
+  const fn=loadNotesFile('edited_'+id);
+  if(fn&&Array.isArray(fn.nt)){
+    S.b[id]=S.b[id]||{p:1,s:0,nt:[]};
+    S.b[id].nt=fn.nt;
+    if(fn.ul)S.b[id].ul=fn.ul;
+    if(fn.uh)S.b[id].uh=fn.uh;
+  }
+  AN=await loadAN(id);
+  doc=await pdfjsLib.getDocument({data:await r.blob.arrayBuffer()}).promise;N=doc.numPages;const b=B();P=Math.min(Math.max(b.p||1,1),N);SH=b.s||0;save();render(1);lists()
+}
 const LIG={'ﬁ':'fi','ﬂ':'fl','ﬀ':'ff','ﬃ':'ffi','ﬄ':'ffl','ﬅ':'st','ﬆ':'st'};
 const clean=t=>t.replace(/[\ufb00-\ufb06]/g,c=>LIG[c]||c).replace(/[\u00ad\u200b\u200c\u200d\ufeff]/g,'');
 const lp=a=>{a=a.slice().sort((x,y)=>x-y);return a.length?a[Math.floor((a.length-1)*.3)]:0};
@@ -178,7 +209,7 @@ async function extract(pg){const x0=pg.view[0],y0=pg.view[1],W=pg.view[2]-x0,H=p
    else{if(/[A-Za-z]-$/.test(cur.t)&&/^[a-z]/.test(r.t))cur.t=(p.r>left+wd*.9?cur.t.slice(0,-1):cur.t)+r.t;else cur.t+=' '+r.t;cur.mx=Math.min(cur.mx,r.x)}});
  });
  out.forEach(p=>{p.q=!p.h&&!p.c&&!p.l&&p.mx-p.lf>body*2.2?1:0});
- return{paras:out.map(p=>({t:p.t.trim(),h:p.h?1:0,c:p.c?1:0,l:p.l?1:0,q:p.q})).filter(p=>p.t),head:HD.join(' · '),foot:FT.join(' · ')}}
+ return{paras:out.map(p=>({t:p.t.trim(),h:p.h?1:0,c:p.c?1:0,l:p.l?1:0,q:p.q?1:0})).filter(p=>p.t),head:HD.join(' · '),foot:FT.join(' · ')}}
 async function words(p,pg){const k=S.cur+'_'+p;if(WC[k])return WC[k];const e=await extract(pg);return WC[k]={head:e.head,foot:e.foot,paras:e.paras.map(p=>({w:p.t.split(/\s+/).filter(Boolean),h:p.h,c:p.c,l:p.l,q:p.q}))}}
 function fam(){return(/^F\d/.test(S.ff)?`'${S.ff}'`:S.ff)+',serif'}
 function typeset(paras){const vw=$('#vw'),col=$('#col');CW=Math.max(80,vw.clientWidth-2*S.mg);
@@ -226,18 +257,37 @@ function setTool(t){if(!doc)return;if(!$('#sheet').hidden&&(t=='pen'||t=='er'))r
 function undoEd(){const bk=B(),h=bk.uh||[];if(!h.length)return flash('NOTHING TO UNDO');const x=h.pop(),u=(bk.ul||{})[x.p]||[];x.a.forEach(k=>{const q=u.indexOf(k);if(q>=0)u.splice(q,1)});save();
  if(x.p!=P){P=x.p;SH=0;render()}else $('#col').querySelectorAll('[data-w]').forEach(sp=>{if(x.a.indexOf(+sp.dataset.w)>=0)sp.classList.remove('ul')})}
 $('#un').onclick=()=>{if(!doc)return;if(!$('#sheet').hidden)return undoEd();undoAN()};
-function lineOf(i){const col=$('#col'),ws=col.querySelectorAll('[data-w]'),o=col.getBoundingClientRect().left,r0=ws[i].getBoundingClientRect(),c0=Math.floor((r0.left-o+2)/CW),
- same=j=>{const r=ws[j].getBoundingClientRect();return Math.abs(r.top-r0.top)<2&&Math.floor((r.left-o+2)/CW)==c0};let a=i,b=i;while(a>0&&same(a-1))a--;while(b<ws.length-1&&same(b+1))b++;return[a,b,ws]}
+
+/* ---- Edited-mode line detection (fixed tolerance + column awareness) ---- */
+function lineOf(i){
+  const col=$('#col'),ws=col.querySelectorAll('[data-w]'),o=col.getBoundingClientRect().left,
+    r0=ws[i].getBoundingClientRect(),c0=Math.floor((r0.left-o+2)/CW),
+    midY=r0.top+r0.height/2,tol=Math.max(r0.height*0.45,4);
+  const same=j=>{
+    const r=ws[j].getBoundingClientRect();
+    return Math.abs((r.top+r.height/2)-midY)<tol&&Math.floor((r.left-o+2)/CW)===c0;
+  };
+  let a=i,b=i;while(a>0&&same(a-1))a--;while(b<ws.length-1&&same(b+1))b++;
+  return[a,b,ws];
+}
 $('#vw').addEventListener('click',e=>{
  if(TOOL=='ul'&&!$('#sheet').hidden){const s=e.target.closest('[data-w]');if(!s)return;const i=+s.dataset.w,[a,b,ws]=lineOf(i),bk=B();bk.ul=bk.ul||{};const u=bk.ul[P]=bk.ul[P]||[],add=[];
   for(let k=a;k<=b;k++)if(u.indexOf(k)<0){u.push(k);add.push(k);ws[k].classList.add('ul')}
   if(add.length){bk.uh=(bk.uh||[]).concat([{p:P,a:add}]).slice(-300);save()}return}
  if(TOOL!='note'||$('#sheet').hidden)return;TOOL=null;S.tool=null;uiTool();setTitle();const s=e.target.closest('[data-w]');if(!s)return;
  const t=prompt('Sticky note');if(!t)return;const b=B();b.nt.push({p:P,k:'w',w:+s.dataset.w,t,c:b.nt.length%4});save();render(1);lists()});
+
 /* ---- annotations on the original PDF ---- */
 let AN={u:[],s:[],n:[],h:[],c:1},TC={},cur=null,adt;const dpr=()=>window.devicePixelRatio||1;
-async function loadAN(id){const r=await tx('a','readonly',s=>s.get(id));return r&&r.d&&r.d.u?r.d:{u:[],s:[],n:[],h:[],c:1}}
-function flushAN(){clearTimeout(adt);if(S.cur)tx('a','readwrite',s=>s.put({id:S.cur,d:AN}))}
+async function loadAN(id){
+  const fromFile=loadNotesFile('book_'+id);
+  if(fromFile&&fromFile.u)return fromFile;
+  const r=await tx('a','readonly',s=>s.get(id));
+  const old=r&&r.d&&r.d.u?r.d:null;
+  if(old){saveNotesFile('book_'+id,old);return old}
+  return{u:[],s:[],n:[],h:[],c:1};
+}
+function flushAN(){clearTimeout(adt);if(S.cur){saveNotesFile('book_'+S.cur,AN);tx('a','readwrite',s=>s.put({id:S.cur,d:AN}))}}
 function saveAN(){clearTimeout(adt);adt=setTimeout(flushAN,200)}
 addEventListener('pagehide',()=>{flushAN();save()});document.addEventListener('visibilitychange',()=>{if(document.hidden){flushAN();save()}});
 function mkLines(its){const a=its.slice().sort((p,q)=>p.b-q.b||p.x-q.x),L=[];a.forEach(i=>{const l=L.find(l=>Math.abs(l.b-i.b)<i.h*.4&&i.x-l.x2<i.h*2.5&&i.x-l.x2>-i.h*2);
@@ -264,8 +314,20 @@ function undoAN(){const o=AN.h.pop();if(!o)return flash('NOTHING TO UNDO');let i
  if(o.o=='a'){const i=AN[o.k].findIndex(x=>x.id==o.id);if(i<0){saveAN();return}it=AN[o.k].splice(i,1)[0]}else{AN[o.k].splice(Math.min(o.ix,AN[o.k].length),0,o.it);it=o.it}
  saveAN();if(it.p!=P){P=it.p;SH=0;render()}else{drawAN();notesDom()}}
 const d2=(px,py,ax,ay,bx,by)=>{const vx=bx-ax,vy=by-ay,l=vx*vx+vy*vy;let t=l?((px-ax)*vx+(py-ay)*vy)/l:0;t=Math.max(0,Math.min(1,t));const qx=ax+t*vx-px,qy=ay+t*vy-py;return qx*qx+qy*qy};
-function lineAt(x,y){const t=TC[S.cur+'_'+P];if(!t)return null;const X=x*t.W,Y=y*t.H;let b=null,bd=1e9;
- t.lines.forEach(l=>{const d=Math.abs(Y-(l.b-l.h*.35));if(d<l.h*.9&&X>l.x1-l.h&&X<l.x2+l.h&&d<bd){bd=d;b=l}});return b}
+
+/* ---- PDF-mode line hit test (fixed) ---- */
+function lineAt(x,y){
+  const t=TC[S.cur+'_'+P];
+  if(!t)return null;
+  const X=x*t.W,Y=y*t.H;
+  let best=null,bestDist=1e9;
+  t.lines.forEach(l=>{
+    const yDist=Math.abs(Y-(l.b+l.h*0.25));
+    const xIn=X>l.x1-l.h*0.6&&X<l.x2+l.h*0.6;
+    if(yDist<l.h*0.8&&xIn&&yDist<bestDist){bestDist=yDist;best=l}
+  });
+  return best;
+}
 function eraseAt(x,y,asp){let hit=0;
  AN.s.filter(s=>s.p==P).forEach(s=>{const th=.02+s.w/2,p=s.pts;for(let i=0;i+1<p.length;i+=2){const j=Math.min(i+2,p.length-2);if(d2(x,y*asp,p[i],p[i+1]*asp,p[j],p[j+1]*asp)<th*th){delIt('s',s);hit=1;return}}});
  AN.u.filter(u=>u.p==P).forEach(u=>{if(Math.abs(u.y-y)*asp<.02&&x>u.x1-.02&&x<u.x2+.02){delIt('u',u);hit=1}});if(hit)drawAN()}
@@ -273,15 +335,20 @@ const ac=$('#ac'),pt=e=>{const r=ac.getBoundingClientRect();return[(e.clientX-r.
 ac.onpointerdown=e=>{if(!TOOL||TOOL=='sel'||!doc)return;e.preventDefault();ac.setPointerCapture(e.pointerId);const p=pt(e),x=p[0],y=p[1],r=p[2],t=TC[S.cur+'_'+P];
  if(TOOL=='pen'){cur={id:AN.c++,p:P,c:S.pc,w:S.pw/r.width,pts:[+x.toFixed(4),+y.toFixed(4)]}}
  else if(TOOL=='er')eraseAt(x,y,r.height/r.width);
- else if(TOOL=='ul'){const l=lineAt(x,y);if(!l)return flash('TAP ON A TEXT LINE');const y2=(l.b+l.h*.12)/t.H,x1=l.x1/t.W,x2=l.x2/t.W;
-  if(AN.u.some(u=>u.p==P&&Math.abs(u.y-y2)<.002&&u.x1<=x1+.01&&u.x2>=x2-.01))return;addIt('u',{id:AN.c++,p:P,x1,x2,y:y2,c:S.uc});drawAN()}
+ else if(TOOL=='ul'){
+   const l=lineAt(x,y);if(!l)return flash('TAP ON A TEXT LINE');
+   const y2=(l.b+l.h*0.25)/t.H;
+   const x1=l.x1/t.W,x2=l.x2/t.W;
+   if(AN.u.some(u=>u.p==P&&Math.abs(u.y-y2)<.002&&u.x1<=x1+.01&&u.x2>=x2-.01))return;
+   addIt('u',{id:AN.c++,p:P,x1,x2,y:y2,c:S.uc});drawAN()}
  else if(TOOL=='note'){const l=lineAt(x,y);setTimeout(()=>{const tx_=prompt('Folded note');if(!tx_)return;const side=x<.5?0:1;
   addIt('n',{id:AN.c++,p:P,y:l?(l.b-l.h*.35)/t.H:y,x:l?(side?l.x2/t.W:l.x1/t.W):x,side,t:tx_,c:AN.n.length%4});TOOL=null;S.tool=null;save();uiTool();setTitle();drawAN();notesDom()},0)}};
 ac.onpointermove=e=>{const p=pt(e);if(cur){cur.pts.push(+p[0].toFixed(4),+p[1].toFixed(4));drawAN();strokePath(ac.getContext('2d'),cur,ac.width,ac.height)}else if(TOOL=='er'&&e.buttons)eraseAt(p[0],p[1],p[2].height/p[2].width)};
 ac.onpointerup=ac.onpointercancel=()=>{if(cur){if(cur.pts.length==2)cur.pts.push(cur.pts[0],cur.pts[1]);addIt('s',cur);cur=null;drawAN()}};
 const mb=n=>n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
-async function storage(){const bs=await books(),ms=(await tx('m','readonly',s=>s.getAll()))||[],bz=bs.reduce((a,b)=>a+(b.blob?b.blob.size:0),0),mz=ms.reduce((a,m)=>a+(m.blob?m.blob.size:0),0);let t='';
- try{const e=await navigator.storage.estimate();t=' · app total '+mb(e.usage)}catch(e){}$('#sto').textContent='Stored copies: PDFs '+mb(bz)+' · songs '+ms.length+' ('+mb(mz)+')'+t}
+async function storage(){const bs=await books();const bz=bs.reduce((a,b)=>a+(b.blob?b.blob.size:0),0);let t='';
+ try{const e=await navigator.storage.estimate();t=' · app total '+mb(e.usage)}catch(e){}
+ $('#sto').textContent='Stored copies: PDFs '+mb(bz)+' · songs '+T.length+' (streamed)'+t}
 async function delBook(b){if(!confirm('Remove "'+b.name+'" and its marks from the app?'))return;
  await tx('b','readwrite',s=>s.delete(b.id));await tx('a','readwrite',s=>s.delete(b.id));delete S.b[b.id];
  if(S.cur==b.id){tok++;clearTimeout(adt);S.cur=null;doc=null;N=0;P=1;AN={u:[],s:[],n:[],h:[],c:1};TC={};WC={};$('#pw').hidden=true;$('#sheet').hidden=true;setTitle()}save();lists()}
@@ -306,35 +373,83 @@ $('#ft').onchange=async e=>{const f=e.target.files[0];if(!f)return;const id=Date
 document.querySelectorAll('[data-k]').forEach(e=>{const k=e.dataset.k;e.type=='checkbox'?e.checked=!!S[k]:e.value=S[k];
  e.oninput=()=>{S[k]=e.type=='checkbox'?+e.checked:e.type=='range'?+e.value:e.value;save();if(k=='pc'||k=='pw'||k=='uc')return;render(1)}});
 function setLock(on){S.locked=on;save();document.body.classList.toggle('locked',!!on);try{on?Lock.lock():Lock.unlock()}catch(e){}}
-$('#lk').onclick=()=>{if(!S.locked){if(!S.pin){const p=prompt('Set a PIN (needed to unlock)');if(!p)return;S.pin=p;save()}setLock(1)}else if(prompt('PIN')===S.pin)setLock(0)};
+$('#lk').onclick=()=>{if(!S.locked){if(!S.pin){const p=prompt('Set a PIN (needed to unlock)');if(!p)return;S.pin=p;save()}setLock(1)}else if(S.pin&&prompt('PIN')===S.pin)setLock(0)};
 $('#st').onclick=()=>{if(S.locked)return;lists();$('#pn').hidden=false};$('#cl').onclick=()=>$('#pn').hidden=true;
 $('#cp').onclick=()=>{const p=prompt('New PIN');if(p){S.pin=p;save()}};
 document.oncontextmenu=e=>{if(!e.target.closest('#col,#tl'))e.preventDefault()};
-/* music */
+
+/* ---- music: stream from storage via native localhost server ---- */
 let T=[],lt=0;const au=new Audio(),mp=$('#mp');
+const AUDIO_PORT=(window.Files&&Files.getAudioPort)?Files.getAudioPort():0;
 function clampMp(){const x=Math.min(Math.max(0,mp.offsetLeft),innerWidth-mp.offsetWidth),y=Math.min(Math.max($('#top').offsetHeight,mp.offsetTop),innerHeight-mp.offsetHeight-4);mp.style.left=x+'px';mp.style.top=y+'px';S.mp={x,y}}
 function showMp(){mp.style.display=S.mv?'block':'none';if(S.mv){mp.style.left=S.mp.x+'px';mp.style.top=S.mp.y+'px';clampMp()}}
 function lbl(){$('#mg').textContent=T.length?'♪ '+(S.ti+1)+'/'+T.length:'♪ –';$('#m1').textContent=au.paused?'▶':'❚❚'}
-function play(i,go=1){if(!T.length)return;S.ti=(i+T.length)%T.length;au.src=T[S.ti].u;S.tt=0;save();if(go)au.play().catch(e=>showErr('audio: '+e.message));lbl()}
-async function loadT(){const r=(await tx('m','readonly',s=>s.getAll()))||[];T=r.sort((a,b)=>a.id-b.id).map(x=>({n:x.name,u:URL.createObjectURL(x.blob)}));
- if(T.length){S.ti=Math.min(S.ti,T.length-1);au.src=T[S.ti].u;au.onloadedmetadata=()=>{au.currentTime=S.tt||0;au.onloadedmetadata=null};lbl()}showMp()}
-$('#fm').onchange=async e=>{const fs=[...e.target.files].sort((a,b)=>a.name.localeCompare(b.name,0,{numeric:true}));if(!fs.length)return;
- await tx('m','readwrite',s=>{s.clear();fs.forEach((f,i)=>s.put({id:i,name:f.name,blob:f}))});S.ti=0;S.mv=1;await loadT();play(0);storage()};
+function audioSrc(track){
+  if(!track)return '';
+  if(AUDIO_PORT&&track.id)return 'http://127.0.0.1:'+AUDIO_PORT+'/'+track.id;
+  return track.uri||'';
+}
+function play(i,go=1){
+  if(!T.length)return;
+  S.ti=(i+T.length)%T.length;S.tt=0;
+  au.src=audioSrc(T[S.ti]);
+  save();
+  if(go)au.play().catch(e=>showErr('audio: '+e.message));
+  lbl();
+}
+async function loadT(){
+  T=(S.mtracks||[]).slice();
+  if(window.Files&&Files.addAudio){
+    for(const t of T){if(t.uri){try{t.id=Files.addAudio(t.uri)}catch(e){}}}
+  }
+  if(T.length){
+    S.ti=Math.min(Math.max(0,S.ti||0),T.length-1);
+    au.src=audioSrc(T[S.ti]);
+    au.onloadedmetadata=()=>{try{if(S.tt)au.currentTime=S.tt}catch(e){}au.onloadedmetadata=null};
+    lbl();
+  }
+  showMp();
+}
+window.__onAudioPicked=function(json){
+  try{
+    const arr=JSON.parse(json);
+    if(!arr||!arr.length)return;
+    arr.sort((a,b)=>a.name.localeCompare(b.name,0,{numeric:true}));
+    const mapped=arr.map(x=>{
+      const t={name:x.name,uri:x.uri};
+      if(window.Files&&Files.addAudio){try{t.id=Files.addAudio(x.uri)}catch(e){}}
+      return t;
+    });
+    S.mtracks=mapped;S.ti=0;S.mv=1;save();
+    loadT().then(()=>play(0));
+    storage();
+  }catch(e){showErr('pick: '+e.message)}
+};
+$('#fm').onclick=()=>{
+  if(window.Files&&Files.pickAudio)Files.pickAudio();
+  else showErr('Native picker unavailable');
+};
 au.onended=()=>play(S.ti+1);au.onplay=au.onpause=lbl;au.ontimeupdate=()=>{if(Date.now()-lt>2000){lt=Date.now();S.tt=au.currentTime;save()}};
 $('#m0').onclick=()=>play(S.ti-1);$('#m2').onclick=()=>play(S.ti+1);$('#m1').onclick=()=>au.paused?au.play().catch(()=>{}):au.pause();
-$('#mrm').onclick=async()=>{if(!confirm('Remove all saved songs from the app?'))return;await tx('m','readwrite',s=>s.clear());au.pause();au.removeAttribute('src');T=[];S.ti=0;S.tt=0;save();lbl();showMp();storage()};
+$('#mrm').onclick=async()=>{
+  if(!confirm('Remove all songs from the playlist?'))return;
+  au.pause();au.removeAttribute('src');
+  T=[];S.mtracks=[];S.ti=0;S.tt=0;save();lbl();showMp();storage();
+};
 $('#mv').onclick=()=>{S.mv=S.mv?0:1;save();showMp()};
 $('#mt').onclick=()=>{S.mv=S.mv?0:1;save();showMp()};
 {const h=$('#mg');let ox,oy;h.onpointerdown=e=>{h.setPointerCapture(e.pointerId);ox=e.clientX-mp.offsetLeft;oy=e.clientY-mp.offsetTop;h.onpointermove=e=>{mp.style.left=e.clientX-ox+'px';mp.style.top=e.clientY-oy+'px';clampMp()}};h.onpointerup=()=>{h.onpointermove=null;save()}}
 let lw=innerWidth;addEventListener('resize',()=>{if(S.mv)clampMp();if(innerWidth!=lw){lw=innerWidth;layout();render(1)}});
-/* quick notes pad */
+
+/* ---- quick notes pad ---- */
 const QN=()=>S.qn||(S.qn=[]);
 function npShow(){const n=QN();S.qi=Math.min(Math.max(S.qi||0,0),Math.max(0,n.length-1));$('#nc').textContent=n.length?(S.qi+1)+'/'+n.length:'0/0';$('#nx').value=n.length?n[S.qi].t:'';$('#nx').disabled=!n.length}
 $('#nt').onclick=()=>{const np=$('#np');$('#tp').hidden=true;$('#tr').classList.remove('on');np.hidden=!np.hidden;$('#nt').classList.toggle('on',!np.hidden);if(!np.hidden){layout();npShow()}};
 $('#nx').oninput=()=>{const n=QN();if(n.length){n[S.qi].t=$('#nx').value;save()}};
 $('#nd').onclick=()=>{const n=QN();if(!n.length)return;n.splice(S.qi,1);save();npShow()};
 $('#na').onclick=()=>{QN().push({id:Date.now(),t:''});S.qi=QN().length-1;save();npShow();$('#nx').disabled=false;$('#nx').focus()};
-/* gemini chat (music player) */
+
+/* ---- gemini chat (music player button) ---- */
 const GH=()=>S.gh||(S.gh=[]);
 function gmsg(r,t){const d=document.createElement('div');d.className='gm '+r;d.textContent=t;$('#gl').append(d);$('#gl').scrollTop=1e9;return d}
 $('#gm').onclick=()=>{const g=$('#gc');g.hidden=!g.hidden;if(!g.hidden){layout();$('#gl').innerHTML='';GH().forEach(x=>gmsg(x.r,x.t));setTimeout(()=>$('#gi').focus(),60)}};
@@ -350,7 +465,8 @@ async function gsend(){const q=$('#gi').value.trim();if(!q)return;$('#gi').value
 $('#gs').onclick=gsend;$('#gi').onkeydown=e=>{if(e.key=='Enter'||e.keyCode==13)gsend()};
 $('#gkb').onclick=()=>{const v=$('#gk').value.trim();if(!v)return;S.gk=v;save();$('#gk').value='';$('#gk').placeholder='Key saved ✓ (paste to replace)'};
 if(S.gk)$('#gk').placeholder='Key saved ✓ (paste to replace)';
-/* English -> Bangla translator */
+
+/* ---- English → Bangla translator ---- */
 let TRB='',PRE='';
 const isW=q=>!/\s/.test(q)&&q.length<=40;
 function parseJ(t){t=String(t).replace(/^\s*```(?:json)?\s*|\s*```\s*$/g,'').trim();try{return JSON.parse(t)}catch(e){return{bn:t}}}
@@ -376,13 +492,42 @@ $('#tr').onclick=()=>{const t=$('#tp');t.hidden=!t.hidden;$('#tr').classList.tog
  if(!t.hidden){$('#np').hidden=true;$('#nt').classList.remove('on');layout();drawH();if(PRE){$('#ti').value=PRE.slice(0,1500);doTr()}}PRE=''};
 $('#tpx').onclick=()=>{$('#tp').hidden=true;$('#tr').classList.remove('on')};
 $('#tgo').onclick=doTr;$('#tcl').onclick=()=>{$('#ti').value='';$('#to').innerHTML='';TRB=''};$('#tcp').onclick=()=>{if(TRB)copyT(TRB)};
-/* gemini browser (dock) */
+
+/* ---- chatgpt browser (dock) — session preserved, no reload ---- */
 function brGo(){const q=$('#bq').value.trim();if(!q)return;
- const u=/^https?:\/\//i.test(q)?q:/^[^\s]+\.[^\s]{2,}$/.test(q)?'https://'+q:'https://www.google.com/search?q='+encodeURIComponent(q);try{Gem.load(u)}catch(e){showErr('Browser works in the installed app')}}
-$('#gb').onclick=()=>{const br=$('#br');br.hidden=false;layout();$('#bq').value='';const r=$('#bb').getBoundingClientRect(),b=br.getBoundingClientRect();
- try{Gem.open(Math.round(r.bottom),Math.round(innerHeight-b.bottom),'https://gemini.google.com/app')}catch(e){showErr('Browser works in the installed app')}};
+ const u=/^https?:\/\//i.test(q)?q:/^[^\s]+\.[^\s]{2,}$/.test(q)?'https://'+q:'https://www.google.com/search?q='+encodeURIComponent(q);
+ try{Gem.load(u)}catch(e){showErr('Browser works in the installed app')}}
+$('#gb').onclick=()=>{
+  const br=$('#br');br.hidden=false;layout();$('#bq').value='';
+  const r=$('#bb').getBoundingClientRect(),b=br.getBoundingClientRect();
+  try{Gem.open(Math.round(r.bottom),Math.round(innerHeight-b.bottom),'https://chatgpt.com/')}
+  catch(e){showErr('Browser works in the installed app')}
+};
 $('#bk2').onclick=()=>{try{Gem.close()}catch(e){}$('#br').hidden=true};
 $('#bq').onkeydown=e=>{if(e.key=='Enter'||e.keyCode==13){brGo();$('#bq').blur()}};$('#bgo').onclick=brGo;
+
+/* ---- floating back button ---- */
+function panelsOpen(){
+  return !$('#pn').hidden||!$('#np').hidden||!$('#tp').hidden||!$('#gc').hidden||!$('#br').hidden||!$('#sw').hidden;
+}
+function closeTop(){
+  const order=['#pn','#sw','#gc','#br','#tp','#np'];
+  for(const s of order){
+    const el=$(s);
+    if(!el.hidden){
+      el.hidden=true;
+      if(s==='#np')$('#nt').classList.remove('on');
+      if(s==='#tp')$('#tr').classList.remove('on');
+      if(s==='#br'){try{Gem.close()}catch(e){}}
+      return true;
+    }
+  }
+  return false;
+}
+window.__back=function(){return closeTop()};
+$('#bk').onclick=()=>closeTop();
+setInterval(()=>{if(window.$)$('#bk').classList.toggle('on',panelsOpen())},200);
+
 uiTool();layout();apply();if(S.locked)setLock(1);pal();loadT();loadFonts();purge().then(()=>{if(S.cur)openBook(S.cur);else lists()});
 window.BOOT=1;
 </script></body></html>
