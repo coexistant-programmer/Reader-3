@@ -319,7 +319,7 @@ public class MainActivity extends BridgeActivity {
         out.flush();
         s.close();
       } catch (Exception e) {
-        try { s.close(); } catch (Exception _) { }
+        try { s.close(); } catch (Exception ignored) { }
       }
     }
   }
